@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>検索結果</title>
+</head>
+<body>
+    <h1>検索結果</h1>
+
+    <% if (results.length === 0) { %>
+        <p>検索結果はありませんでした。</p>
+    <% } else { %>
+        <ul>
+            <% results.forEach(result => { %>
+                <li><%= result.name %>: <%= result.message %></li>
+            <% }); %>
+        </ul>
+    <% } %>
+
+    <a href="/">戻る</a>
+</body>
+</html>

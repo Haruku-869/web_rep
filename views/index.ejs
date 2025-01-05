@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>BBS</title>
+</head>
+<body>
+    <h1>投稿フォーム</h1>
+    <form id="post-form">
+        <input type="text" id="name" placeholder="名前" required>
+        <textarea id="message" placeholder="メッセージ" required></textarea>
+        <input type="text" id="category" placeholder="カテゴリー" required>
+        <button type="submit" id="post">投稿する</button>
+    </form>
+
+    <h2>投稿一覧</h2>
+    <div id="bbs">
+        <!-- 投稿一覧がここに表示されます -->
+    </div>
+
+    <h3>キーワード検索</h3>
+    <input type="text" id="search-input" placeholder="キーワードで検索">
+    <button id="search-btn">検索</button>
+
+    <!-- 検索結果を表示するためのdiv -->
+    <div id="search-results"></div>
+
+    <h3>カテゴリー別投稿</h3>
+    <button id="category-btn" data-category="日常">日常</button>
+    <button id="category-btn" data-category="勉強">勉強</button>
+    <button id="category-btn" data-category="緊急">緊急</button>
+    
+    <div id="categoryResults">
+        <!-- カテゴリー検索結果がここに表示されます -->
+    </div>
+    <script>
+        const bbs = document.querySelector('#bbs');
+        const postForm = document.querySelector('#post-form');
+        const nameInput = document.querySelector('#name');
+        const messageInput = document.querySelector('#message');
+        const categoryInput = document.querySelector('#category');
+        const searchInput = document.querySelector('#search-input');
+        const searchBtn = document.querySelector('#search-btn');
+
+        // 投稿ボタンのイベント
+        postForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // フォーム送信を防止
+
+            const name = nameInput.value;
+            const message = messageInput.value;
+            const category = categoryInput.value;
+
+            // 投稿データをサーバーに送信
+            const params = {
+                method: "POST",
+                body: 'name=' + encodeURIComponent(name) + '&message=' + encodeURIComponent(message) + '&category=' + encodeURIComponent(category),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            };
+
+            fetch('/post', params)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // サーバーからの成功レスポンス後に投稿を画面に追加
+                        const postElement = document.createElement('div');
+                        postElement.className = 'post';
+
+                        const nameElement = document.createElement('h3');
+                        nameElement.innerText = data.post.name;
+                        const messageElement = document.createElement('p');
+                        messageElement.innerText = data.post.message;
+                        const categoryElement = document.createElement('p');
+                        categoryElement.innerText = 'カテゴリー: ' + data.post.category;
+                        const likeButton = document.createElement('button');
+                        likeButton.innerText = 'いいね';
+                        likeButton.addEventListener('click', () => {
+                            fetch(`/like/${data.post.id}`, { method: 'POST' })
+                                .then(response => response.json())
+                                .then(likeData => {
+                                    likeButton.innerText = `いいね: ${likeData.likes}`;
+                                });
+                        });
+
+                        postElement.appendChild(nameElement);
+                        postElement.appendChild(messageElement);
+                        postElement.appendChild(categoryElement);
+                        postElement.appendChild(likeButton);
+                        bbs.appendChild(postElement);
+
+                        // 入力フィールドをリセット
+                        nameInput.value = '';
+                        messageInput.value = '';
+                        categoryInput.value = '';
+                    }
+                });
+        });
+
+        // 検索ボタンのイベント（POST メソッドに変更）
+        searchBtn.addEventListener('click', () => {
+            const keyword = searchInput.value;
+            const params = {
+                method: "POST",
+                body: 'keyword=' + encodeURIComponent(keyword),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            };
+            fetch('/search', params)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.querySelector('#search-results');
+                    resultsDiv.innerHTML = ""; // 既存の結果をクリア
+
+                    if (data.results.length === 0) {
+                        resultsDiv.innerHTML = "<p>検索結果はありませんでした。</p>";
+                    } else {
+                        const ul = document.createElement('ul');
+                        data.results.forEach(post => {
+                            const li = document.createElement('li');
+                            li.textContent = `${post.name}: ${post.message}`;
+                            ul.appendChild(li);
+                        });
+                        resultsDiv.appendChild(ul);
+                    }
+                });
+        });
+
+        // カテゴリーボタンのイベント（POST メソッドに変更）
+        document.querySelectorAll('#category-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.getAttribute('data-category');
+                const params = {
+                    method: "POST",
+                    body: 'category=' + encodeURIComponent(category),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                };
+fetch('/category', params)
+    .then(response => response.json())
+    .then(data => {
+        bbs.innerHTML = ""; // 投稿リストをクリア
+
+        // 投稿がない場合はメッセージを表示
+        if (data.posts.length === 0) {
+            const noPostsMessage = document.createElement('p');
+            noPostsMessage.innerText = "このカテゴリーには投稿がありません。";
+            bbs.appendChild(noPostsMessage);
+        } else {
+            // 投稿がある場合は投稿一覧を表示
+            data.posts.forEach(post => {
+                const cover = document.createElement('div');
+                cover.className = 'cover';
+
+                const name_area = document.createElement('span');
+                name_area.className = 'name';
+                name_area.innerText = post.name;
+
+                const mes_area = document.createElement('span');
+                mes_area.className = 'mes';
+                mes_area.innerText = post.message;
+
+                cover.appendChild(name_area);
+                cover.appendChild(mes_area);
+
+                bbs.appendChild(cover);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('カテゴリー検索エラー:', error);
+        bbs.innerHTML = "<p>エラーが発生しました。</p>";
+    });  
+        });
+    });
+</script>
+</body>
+</html>
