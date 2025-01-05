@@ -15,14 +15,14 @@
 
     <h2>投稿一覧</h2>
     <div id="bbs">
-        <!-- 投稿一覧がここに表示されます -->
+        <!-- 投稿一覧をここに表示 -->
     </div>
 
     <h3>キーワード検索</h3>
     <input type="text" id="search-input" placeholder="キーワードで検索">
     <button id="search-btn">検索</button>
 
-    <!-- 検索結果を表示するためのdiv -->
+    <!-- 検索結果を表示 -->
     <div id="search-results"></div>
 
     <h3>カテゴリー別投稿</h3>
@@ -31,7 +31,7 @@
     <button id="category-btn" data-category="緊急">緊急</button>
     
     <div id="categoryResults">
-        <!-- カテゴリー検索結果がここに表示されます -->
+        <!-- カテゴリー検索結果を表示 -->
     </div>
     <script>
         const bbs = document.querySelector('#bbs');
@@ -42,15 +42,15 @@
         const searchInput = document.querySelector('#search-input');
         const searchBtn = document.querySelector('#search-btn');
 
-        // 投稿ボタンのイベント
+       
         postForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // フォーム送信を防止
+            event.preventDefault(); 
 
             const name = nameInput.value;
             const message = messageInput.value;
             const category = categoryInput.value;
 
-            // 投稿データをサーバーに送信
+           
             const params = {
                 method: "POST",
                 body: 'name=' + encodeURIComponent(name) + '&message=' + encodeURIComponent(message) + '&category=' + encodeURIComponent(category),
@@ -63,7 +63,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // サーバーからの成功レスポンス後に投稿を画面に追加
+                        
                         const postElement = document.createElement('div');
                         postElement.className = 'post';
 
@@ -89,7 +89,7 @@
                         postElement.appendChild(likeButton);
                         bbs.appendChild(postElement);
 
-                        // 入力フィールドをリセット
+                        
                         nameInput.value = '';
                         messageInput.value = '';
                         categoryInput.value = '';
@@ -97,7 +97,7 @@
                 });
         });
 
-        // 検索ボタンのイベント（POST メソッドに変更）
+        
         searchBtn.addEventListener('click', () => {
             const keyword = searchInput.value;
             const params = {
@@ -111,7 +111,7 @@
                 .then(response => response.json())
                 .then(data => {
                     const resultsDiv = document.querySelector('#search-results');
-                    resultsDiv.innerHTML = ""; // 既存の結果をクリア
+                    resultsDiv.innerHTML = ""; 
 
                     if (data.results.length === 0) {
                         resultsDiv.innerHTML = "<p>検索結果はありませんでした。</p>";
@@ -127,7 +127,7 @@
                 });
         });
 
-        // カテゴリーボタンのイベント（POST メソッドに変更）
+        
         document.querySelectorAll('#category-btn').forEach(button => {
             button.addEventListener('click', () => {
                 const category = button.getAttribute('data-category');
@@ -141,15 +141,15 @@
 fetch('/category', params)
     .then(response => response.json())
     .then(data => {
-        bbs.innerHTML = ""; // 投稿リストをクリア
+        bbs.innerHTML = ""; 
 
-        // 投稿がない場合はメッセージを表示
+        // 投稿がない場合
         if (data.posts.length === 0) {
             const noPostsMessage = document.createElement('p');
             noPostsMessage.innerText = "このカテゴリーには投稿がありません。";
             bbs.appendChild(noPostsMessage);
         } else {
-            // 投稿がある場合は投稿一覧を表示
+            // 投稿がある場合
             data.posts.forEach(post => {
                 const cover = document.createElement('div');
                 cover.className = 'cover';

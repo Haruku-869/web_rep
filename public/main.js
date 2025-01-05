@@ -3,7 +3,7 @@
 let number = 0;
 const bbs = document.querySelector('#bbs');
 
-// 投稿処理
+
 document.querySelector('#post').addEventListener('click', () => {
     const name = document.querySelector('#name').value;
     const message = document.querySelector('#message').value;
@@ -20,12 +20,12 @@ document.querySelector('#post').addEventListener('click', () => {
     fetch("/post", params)
         .then(response => response.json())
         .then(() => {
-            document.querySelector('#message').value = ""; // メッセージをクリア
-            loadPosts(); // 再読み込み
+            document.querySelector('#message').value = ""; 
+            loadPosts(); 
         });
 });
 
-// 投稿一覧読み込み処理
+
 function loadPosts() {
     const params = {
         method: "POST",
@@ -72,10 +72,9 @@ function loadPosts() {
         });
 }
 
-// 初回読み込み
 loadPosts();
 
-// キーワード検索処理
+// キーワード
 document.querySelector('#search').addEventListener('click', () => {
     const keyword = document.querySelector('#keyword').value;
 
@@ -91,7 +90,7 @@ document.querySelector('#search').addEventListener('click', () => {
         .then(response => response.json())
         .then(data => {
             const results = document.querySelector('#search-results');
-            results.innerHTML = ""; // 検索結果をクリア
+            results.innerHTML = ""; 
             for (let post of data.results) {
                 const result = document.createElement('div');
                 result.className = 'result';
@@ -101,6 +100,7 @@ document.querySelector('#search').addEventListener('click', () => {
         });
 });
 
+// カテゴリー
 document.querySelectorAll('#category-btn').forEach(button => {
     button.addEventListener('click', () => {
         const category = button.getAttribute('data-category');
@@ -115,7 +115,7 @@ document.querySelectorAll('#category-btn').forEach(button => {
             .then(response => response.json())
             .then(data => {
                 const categoryResultsDiv = document.querySelector('#categoryResults');
-                categoryResultsDiv.innerHTML = ""; // 既存の結果をクリア
+                categoryResultsDiv.innerHTML = ""; 
 
                 if (data.posts.length === 0) {
                     categoryResultsDiv.innerHTML = "<p>このカテゴリーには投稿がありません。</p>";
